@@ -23,10 +23,10 @@ import normalizeEditorFontFamily from 'browser/lib/normalizeEditorFontFamily'
 const spellcheck = require('browser/lib/spellcheck')
 const buildEditorContextMenu = require('browser/lib/contextMenuBuilder')
 import TurndownService from 'turndown'
+import markdownTocGenerator from '../lib/markdown-toc-generator'
 import {
   gfm
 } from 'turndown-plugin-gfm'
-import markdownTocGenerator from '../lib/markdown-toc-generator'
 
 CodeMirror.modeURL = '../node_modules/codemirror/mode/%N/%N.js'
 
@@ -739,6 +739,8 @@ export default class CodeEditor extends React.Component {
   handleChange (editor, changeObject) {
     spellcheck.handleChange(editor, changeObject)
 
+    this.updateHighlight(editor, changeObject)
+
     // if the editor has a ToC, and the modified line is a header, update the ToC
     const lineChanged = editor.getLine(changeObject.to.line) // contents of the line that was modified
     if (lineChanged[0] === '#') { // Line changed was a markdown header
@@ -754,14 +756,14 @@ export default class CodeEditor extends React.Component {
   }
 
   incrementLines (start, linesAdded, linesRemoved, editor) {
-    const highlightedLines = editor.options.linesHighlighted
+    let highlightedLines = editor.options.linesHighlighted
 
     const totalHighlightedLines = highlightedLines.length
 
-    const offset = linesAdded - linesRemoved
+    let offset = linesAdded - linesRemoved
 
     // Store new items to be added as we're changing the lines
-    const newLines = []
+    let newLines = []
 
     let i = totalHighlightedLines
 
