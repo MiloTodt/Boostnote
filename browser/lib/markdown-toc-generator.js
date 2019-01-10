@@ -25,6 +25,11 @@ function linkify (token) {
   return token
 }
 
+export function tocExistsInEditor (editor) {
+  const tocRegex = new RegExp(`${TOC_MARKER_START}[\\s\\S]*?${TOC_MARKER_END}`)
+  return tocRegex.test(editor.getValue())
+}
+
 const TOC_MARKER_START = '<!-- toc -->'
 const TOC_MARKER_END = '<!-- tocstop -->'
 
@@ -94,5 +99,6 @@ function wrapTocWithEol (toc, editor) {
 
 export default {
   generate,
-  generateInEditor
+  generateInEditor,
+  tocExistsInEditor
 }
