@@ -1118,7 +1118,7 @@ export default class CodeEditor extends React.Component {
             iconv.encodingExists(_charset)
             ? _charset
             : 'utf-8'
-          resolve(iconv.decode(new Buffer(buff), charset).toString())
+          resolve(iconv.decode(Buffer.from(buff), charset).toString())
         } catch (e) {
           reject(e)
         }
