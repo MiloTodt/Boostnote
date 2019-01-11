@@ -743,7 +743,8 @@ export default class CodeEditor extends React.Component {
 
     // if the editor has a ToC, and the modified line is a header, update the ToC
     const lineChanged = editor.getLine(changeObject.to.line) // contents of the line that was modified
-    if (lineChanged[0] === '#') { // Line changed was a markdown header
+    console.log(lineChanged.slice(0,2))
+    if ((lineChanged.slice(0,2) === "##")) { // Line changed was a markdown header, starts with ##
       if (markdownTocGenerator.tocExistsInEditor(editor) === true) { // If there is already a ToC section, update it
         markdownTocGenerator.generateInEditor(editor)
       }
