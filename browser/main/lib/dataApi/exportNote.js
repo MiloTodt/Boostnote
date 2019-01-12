@@ -19,6 +19,7 @@ const attachmentManagement = require('./attachmentManagement')
  * @param {function} outputFormatter
  * @return {Promise.<*[]>}
  */
+
 function exportNote (nodeKey, storageKey, noteContent, targetPath, outputFormatter) {
   const storagePath = path.isAbsolute(storageKey) ? storageKey : findStorage(storageKey).path
   const exportTasks = []
@@ -29,7 +30,8 @@ function exportNote (nodeKey, storageKey, noteContent, targetPath, outputFormatt
   const attachmentsAbsolutePaths = attachmentManagement.getAbsolutePathsOfAttachmentsInContent(
     noteContent,
     storagePath
-  )
+  ).filter(path => fs.existsSync(path))
+
   attachmentsAbsolutePaths.forEach(attachment => {
     exportTasks.push({
       src: attachment,
