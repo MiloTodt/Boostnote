@@ -135,10 +135,19 @@ ReactDOM.render((
     })
     updateApp()
   })
-
   ipcRenderer.on('update-found', function () {
     notify('Update found!', {
       body: 'Preparing to update...'
+    })
+  })
+
+  ipcRenderer.on('update-check-from-menu', function () {
+    ipcRenderer.send('update-check-manual', 'called from menu')
+  })
+
+  ipcRenderer.on('update-unrequired', function (event, message) {
+    notify('No new updates found', {
+      body: 'You have the most current version.'
     })
   })
 
