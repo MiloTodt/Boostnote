@@ -14,11 +14,9 @@ class SnippetTab extends React.Component {
     }
   }
 
-  componentWillUpdate (nextProps) {
-    if (nextProps.snippet.name !== this.props.snippet.name) {
-      this.setState({
-        name: nextProps.snippet.name
-      })
+  componentDidUpdate (prevProps, prevState) {
+    if (this.state.snippet.name !== prevState.snippet.name) {
+      this.props.onChange(this.state.snippet.name)
     }
   }
 
