@@ -50,7 +50,6 @@ const CSS_FILES = [
  * @param {String} opts.theme
  * @param {Boolean} [opts.lineNumber] Should show line number
  * @param {Boolean} [opts.scrollPastEnd]
- * @param {Boolean} [opts.optimizeOverflowScroll] Should tweak body style to optimize overflow scrollbar display
  * @param {Boolean} [opts.allowCustomCSS] Should add custom css
  * @param {String} [opts.customCSS] Will be added to bottom, only if `opts.allowCustomCSS` is truthy
  * @returns {String}
@@ -62,7 +61,6 @@ function buildStyle (opts) {
     codeBlockFontFamily,
     lineNumber,
     scrollPastEnd,
-    optimizeOverflowScroll,
     theme,
     allowCustomCSS,
     customCSS
@@ -107,7 +105,6 @@ body {
     box-sizing: border-box;
     `
     : ''}
-  ${optimizeOverflowScroll ? 'height: 100%;' : ''}
 }
 @media print {
   body {
@@ -183,6 +180,10 @@ const scrollBarStyle = `
 ::-webkit-scrollbar-thumb {
   background-color: rgba(0, 0, 0, 0.15);
 }
+
+::-webkit-scrollbar-track-piece {
+  background-color: inherit;
+}
 `
 const scrollBarDarkStyle = `
 ::-webkit-scrollbar {
@@ -191,6 +192,10 @@ const scrollBarDarkStyle = `
 
 ::-webkit-scrollbar-thumb {
   background-color: rgba(0, 0, 0, 0.3);
+}
+
+::-webkit-scrollbar-track-piece {
+  background-color: inherit;
 }
 `
 
@@ -679,12 +684,10 @@ export default class MarkdownPreview extends React.Component {
       codeBlockFontFamily,
       lineNumber,
       scrollPastEnd,
-      optimizeOverflowScroll: true,
       theme,
       allowCustomCSS,
       customCSS
     })
-    this.getWindow().document.documentElement.style.overflowY = 'hidden'
   }
 
   getCodeThemeLink (name) {
@@ -1066,7 +1069,7 @@ export default class MarkdownPreview extends React.Component {
       if (posOfHash > -1) {
         const extractedId = linkHash.slice(posOfHash + 1)
         const targetId = mdurl.encode(extractedId)
-        const targetElement = this.refs.root.contentWindow.document.getElementById(
+        const targetElement = this.getWindow().document.getElementById(
           targetId
         )
 
