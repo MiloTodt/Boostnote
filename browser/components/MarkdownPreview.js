@@ -21,6 +21,7 @@ import yaml from 'js-yaml'
 import { render } from 'react-dom'
 import Carousel from 'react-image-carousel'
 import ConfigManager from '../main/lib/ConfigManager'
+import i18n from 'browser/lib/i18n'
 
 const { remote, shell } = require('electron')
 const attachmentManagement = require('../main/lib/dataApi/attachmentManagement')
@@ -245,6 +246,7 @@ export default class MarkdownPreview extends React.Component {
     this.saveAsHtmlHandler = () => this.handleSaveAsHtml()
     this.saveAsPdfHandler = () => this.handleSaveAsPdf()
     this.printHandler = () => this.handlePrint()
+    this.resizeHandler = _.throttle(this.handleResize.bind(this), 100)
 
     this.linkClickHandler = this.handleLinkClick.bind(this)
     this.initMarkdown = this.initMarkdown.bind(this)
@@ -348,7 +350,7 @@ export default class MarkdownPreview extends React.Component {
       allowCustomCSS,
       customCSS
     })
-    let body = this.markdown.render(noteContent)
+    let body = this.refs.root.contentWindow.document.body.innerHTML
     body = attachmentManagement.fixLocalURLS(
       body,
       this.props.storagePath
@@ -368,7 +370,7 @@ export default class MarkdownPreview extends React.Component {
 
     let styles = ''
     files.forEach(file => {
-      styles += `<link rel="stylesheet" href="css/${path.basename(file)}">`
+      styles += `<link rel="stylesheet" href="../css/${path.basename(file)}">`
     })
 
     return `<html>
@@ -423,7 +425,8 @@ export default class MarkdownPreview extends React.Component {
           .then(res => {
             dialog.showMessageBox(remote.getCurrentWindow(), {
               type: 'info',
-              message: `Exported to ${filename}`
+              message: `Exported to ${filename}`,
+              buttons: [i18n.__('Ok')]
             })
           })
           .catch(err => {
@@ -538,6 +541,10 @@ export default class MarkdownPreview extends React.Component {
       'scroll',
       this.scrollHandler
     )
+    this.refs.root.contentWindow.addEventListener(
+      'resize',
+      this.resizeHandler
+    )
     eventEmitter.on('export:save-text', this.saveAsTextHandler)
     eventEmitter.on('export:save-md', this.saveAsMdHandler)
     eventEmitter.on('export:save-html', this.saveAsHtmlHandler)
@@ -575,6 +582,10 @@ export default class MarkdownPreview extends React.Component {
     this.refs.root.contentWindow.document.removeEventListener(
       'scroll',
       this.scrollHandler
+    )
+    this.refs.root.contentWindow.removeEventListener(
+      'resize',
+      this.resizeHandler
     )
     eventEmitter.off('export:save-text', this.saveAsTextHandler)
     eventEmitter.off('export:save-md', this.saveAsMdHandler)
@@ -993,6 +1004,15 @@ export default class MarkdownPreview extends React.Component {
       overlay.appendChild(zoomImg)
       document.body.appendChild(overlay)
     }
+  }
+
+  handleResize () {
+    _.forEach(
+      this.refs.root.contentWindow.document.querySelectorAll('svg[ratio]'),
+      el => {
+        el.setAttribute('height', el.clientWidth / el.getAttribute('ratio'))
+      }
+    )
   }
 
   focus () {
